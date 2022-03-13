@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
 
-"""A Package to predict heat capacity of porous materials from local environments."""
+"""A Package to predict heat capacity of porous materials."""
 
-from .utils import iter_together
+from .utils import iter_together  # noqa:F401

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""The API for ``cp_app``"""
+"""The API for ``cp_app``."""
 
 
 def iter_together(path_left: str, path_right: str):
