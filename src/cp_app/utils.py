@@ -14,3 +14,5 @@ def iter_together(path_left: str, path_right: str):
             left_idx, left_value = left_line.strip().split(',')
             right_idx, right_value = right_line.strip().split(',')
             yield left_idx, left_value, right_value
+
+print("HER")
