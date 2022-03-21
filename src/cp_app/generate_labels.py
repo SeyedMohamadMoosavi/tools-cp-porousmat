@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""The methods to compute labels for heat capacity machine learning."""
+"""The methods to compute labels for machine learning the heat capacity."""
 
 from ase.io import read
 from .phononfunctions import  cv_from_pdos_site 
@@ -16,12 +16,12 @@ def compute_total_dos_structure(phonopy_params: str, unitfactor=CP2KToTHz, dx:fl
     """Compute projected dos from phonopy parameter file
 
     :param phonopy_params: list of phonopy parameter files (output of DFT)
-    :cif: list of crystal structure in cif format
-    :temperatures: the target temperature 
-    :factor: the unit conversion factor
-    :dx: spacing to compute dos
-    :fmax: max frequency in dos calculations
-    :freq_pitch: pitch frequency in dos calculations
+    :param cif: list of crystal structure in cif format
+    :param temperatures: the target temperature 
+    :param factor: the unit conversion factor
+    :param dx: spacing to compute dos
+    :param fmax: max frequency in dos calculations
+    :param freq_pitch: pitch frequency in dos calculations
     """
     phonon = None
     phonon = phonopy.load(phonopy_params, factor=unitfactor)
@@ -77,10 +77,10 @@ def compute_atomic_cv_dataset(phonopy_params: list[str], cifs: list[str], temper
         atoms=read(cif)
         if not atoms.get_global_number_of_atoms()==pdos.shape[1]-1:
             print(atoms.get_global_number_of_atoms(),pdos.shape[0])
-            print("Warning! number of atoms do not match in pdos and structure for %s"%name)
+            print("Warning! number of atoms do not match in pdos and structure for %s"%cif)
             continue
         for atomidx in range(atoms.get_global_number_of_atoms()):
-            site_name="%s_%i"%(name,atomidx)
+            site_name="%s_%i"%(cif.replace(".cif",""),atomidx)
             for i,temperature in enumerate(temperatures):
                 cv_site=cv_from_pdos_site(temperature,pdos,atomidx)
                 if i==0:
