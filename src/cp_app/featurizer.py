@@ -54,7 +54,6 @@ def featurize_dataset(cifs: list, verbos=False, saveto: str="features.csv")-> pd
     property_list=("Number","AtomicWeight","Row","Column","Electronegativity","CovalentRadius")
     AGNI = AGNIFingerprints(cutoff=5,directions=[None])
     colnames=AGNI._generate_column_labels(multiindex=False,return_errors=False)
-    print(colnames)
     for index,row in data.iterrows():
         structure=row["structure"]
         if verbos:

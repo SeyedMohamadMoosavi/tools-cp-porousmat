@@ -76,5 +76,20 @@ def cv_from_pdos_site(temp, pdos,site):
     cv_contributions= pdos[:,site+1]* Avo*Kb * x ** 2 * expVal / (expVal - 1.0) ** 2
     return np.sum(cv_contributions)
 
-
+def select_structures(nsamples,df):
+    selected=set()
+    for structure_type in df["structure_type"].unique():
+        selected.add(df.loc[df["structure_type"]==structure_type].index.values[0])
+        selected.add(df.loc[df["structure_type"]==structure_type].index.values[1])
+        if len(selected)>nsamples-1:
+            break
+    for atom_type in df["atom_types"].unique():
+        selected.add(df.loc[df["atom_types"]==atom_type].index.values[0])
+        if len(selected)>nsamples-1:
+            break
+        
+    while len(selected)< nsamples:
+        selected.add(df.sample(1).index.values[0])
+        
+    return selected
 
