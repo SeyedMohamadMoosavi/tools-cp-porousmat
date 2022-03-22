@@ -2,5 +2,8 @@
 
 """General functions and methods for heat capacity."""
 
-from .utils import iter_together  # noqa:F401
-from .phononfunctions import *  # noqa:F401
+# from .utils import * # noqa:F401
+# from .featurizer import featurize_dataset  # noqa:F401
+# from .predictions import *  # noqa:F401
+# from .generate_labels import compute_projected_dos_structure  # noqa:F401
+# from .descriptors import *  # noqa:F401

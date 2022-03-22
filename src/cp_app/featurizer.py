@@ -1,9 +1,105 @@
-import pandas as pd
+# -*- coding: utf-8 -*-
+
+"""The methods to featurize a dataset of porous materials for heat capacity."""
+
 import numpy as np
-import glob
+import pandas as pd
+from typing import List
 from pymatgen.io.cif import CifParser
 from matminer.featurizers.site import GaussianSymmFunc, SiteElementalProperty,AGNIFingerprints 
-from phononfunctions import LocalPropertyStatsNew
+from matminer.featurizers.base import BaseFeaturizer
+from matminer.utils.data import MagpieData
+from pymatgen.analysis.local_env import VoronoiNN
+
+
+def featurize_dataset(cifs: list, verbos=False, saveto: str="features.csv")-> pd.DataFrame:
+    """Featurize crystal structures using elemetal, geometric, and chemical descriptors for local environments.
+
+    :params cifs: list of paths to crystal structure in cif format
+    :params verbos: printing the steps
+    :params saveto: filename to save the generated features
+    """
+    structure_names=[n.replace(".cif","") for n in cifs]
+    features = {n:{} for n in structure_names}
+    for cif in cifs:
+        structure = CifParser(cif).get_structures()[0]
+        features[cif.replace(".cif","")]["structure"]=structure
+
+    data=pd.DataFrame.from_dict(features).T
+    features_dict={}
+    ## 1. initialize the dictionary for each site
+    for index,row in data.iterrows():
+        structure=row["structure"]
+        for atomidx in range(structure.num_sites):
+            site_name="%s_%i"%(index,atomidx)
+            features_dict[site_name]={}
+
+    ## 2. Site Elemental Property
+    print("site elemental properties")
+    property_list=("Number","AtomicWeight","Row","Column","Electronegativity","CovalentRadius")
+    SEP = SiteElementalProperty(properties=property_list)
+    colnames=SEP._generate_column_labels(multiindex=False,return_errors=False)
+    for index,row in data.iterrows():
+        structure=row["structure"]
+        if verbos:
+            print(index)
+        for atomidx in range(structure.num_sites):
+            feat=SEP.featurize(structure,idx=atomidx)
+            site_name="%s_%i"%(index,atomidx)
+            features_dict[site_name].update(dict(zip(colnames, feat)))
+
+
+    ## 3. AGNI
+    print("AGNI")
+    property_list=("Number","AtomicWeight","Row","Column","Electronegativity","CovalentRadius")
+    AGNI = AGNIFingerprints(cutoff=5,directions=[None])
+    colnames=AGNI._generate_column_labels(multiindex=False,return_errors=False)
+    print(colnames)
+    for index,row in data.iterrows():
+        structure=row["structure"]
+        if verbos:
+            print(index)
+        for atomidx in range(structure.num_sites):
+            feat=AGNI.featurize(structure,idx=atomidx)
+            site_name="%s_%i"%(index,atomidx)
+            features_dict[site_name].update(dict(zip(colnames, feat)))
+
+
+    ## 4. Gaussian Symmetry Functions 
+    print("GSF")
+    GSF = GaussianSymmFunc(cutoff=5)
+    colnames=GSF._generate_column_labels(multiindex=False,return_errors=False)
+    for index,row in data.iterrows():
+        structure=row["structure"]
+        if verbos:
+            print(index)
+        for atomidx in range(structure.num_sites):
+            feat=GSF.featurize(structure,idx=atomidx)
+            site_name="%s_%i"%(index,atomidx)
+            features_dict[site_name].update(dict(zip(colnames, feat)))
+
+    ## 5. site difference stats 
+    print("LPD")
+    LPD = LocalPropertyStatsNew(properties=property_list)
+    colnames=LPD._generate_column_labels(multiindex=False,return_errors=False)
+    for index,row in data.iterrows():
+        structure=row["structure"]
+        if verbos:
+            print(index)
+        for atomidx in range(structure.num_sites):
+            feat=LPD.featurize(structure,idx=atomidx)
+            site_name="%s_%i"%(index,atomidx)
+            features_dict[site_name].update(dict(zip(colnames, feat)))
+
+
+    df_features=pd.DataFrame.from_dict(features_dict).T
+    if saveto:
+        df_features.to_csv(saveto)
+
+    return df_features
+
+
+
 
 class LocalPropertyStatsNew(BaseFeaturizer):
     """
@@ -159,87 +255,3 @@ def add_type_feature(mydict,atomtype,name,feat):
     else:
         mydict[atomtype]={name:feat}
     return mydict
-
-def featurize_dataset(cifs: list[str], verbos=False, saveto: str="features.csv")-> pd.DataFrame:
-    """Featurize crystal structures using elemetal, geometric, and chemical descriptors for local environments.
-
-    :cifs: list of crystal structure in cif format
-    """
-    structure_names=[n.replace(".cif","") for n in cifs]
-    features = {n:{} for n in structure_names}
-    for cif in cifs:
-        structure = CifParser(cif).get_structures()[0]
-        features[cif.replace(".cif","")]["structure"]=structure
-
-    data=pd.DataFrame.from_dict(features).T
-    features_dict={}
-    ## 1. initialize the dictionary for each site
-    for index,row in data.iterrows():
-        structure=row["structure"]
-        for atomidx in range(structure.num_sites):
-            site_name="%s_%i"%(index,atomidx)
-            features_dict[site_name]={}
-
-    ## 2. Site Elemental Property
-    print("site elemental properties")
-    property_list=("Number","AtomicWeight","Row","Column","Electronegativity","CovalentRadius")
-    SEP = SiteElementalProperty(properties=property_list)
-    colnames=SEP._generate_column_labels(multiindex=False,return_errors=False)
-    for index,row in data.iterrows():
-        structure=row["structure"]
-        if verbos:
-            print(index)
-        for atomidx in range(structure.num_sites):
-            feat=SEP.featurize(structure,idx=atomidx)
-            site_name="%s_%i"%(index,atomidx)
-            features_dict[site_name].update(dict(zip(colnames, feat)))
-
-
-    ## 3. AGNI
-    print("AGNI")
-    property_list=("Number","AtomicWeight","Row","Column","Electronegativity","CovalentRadius")
-    AGNI = AGNIFingerprints(cutoff=5,directions=[None])
-    colnames=AGNI._generate_column_labels(multiindex=False,return_errors=False)
-    print(colnames)
-    for index,row in data.iterrows():
-        structure=row["structure"]
-        if verbos:
-            print(index)
-        for atomidx in range(structure.num_sites):
-            feat=AGNI.featurize(structure,idx=atomidx)
-            site_name="%s_%i"%(index,atomidx)
-            features_dict[site_name].update(dict(zip(colnames, feat)))
-
-
-    ## 4. Gaussian Symmetry Functions 
-    print("GSF")
-    GSF = GaussianSymmFunc(cutoff=5)
-    colnames=GSF._generate_column_labels(multiindex=False,return_errors=False)
-    for index,row in data.iterrows():
-        structure=row["structure"]
-        if verbos:
-            print(index)
-        for atomidx in range(structure.num_sites):
-            feat=GSF.featurize(structure,idx=atomidx)
-            site_name="%s_%i"%(index,atomidx)
-            features_dict[site_name].update(dict(zip(colnames, feat)))
-
-    ## 5. site difference stats 
-    print("LPD")
-    LPD = LocalPropertyStatsNew(properties=property_list)
-    colnames=LPD._generate_column_labels(multiindex=False,return_errors=False)
-    for index,row in data.iterrows():
-        structure=row["structure"]
-        if verbos:
-            print(index)
-        for atomidx in range(structure.num_sites):
-            feat=LPD.featurize(structure,idx=atomidx)
-            site_name="%s_%i"%(index,atomidx)
-            features_dict[site_name].update(dict(zip(colnames, feat)))
-
-
-    df_features=pd.DataFrame.from_dict(features_dict).T
-    if saveto:
-        df_features.to_csv(saveto)
-
-    return df_features

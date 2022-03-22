@@ -3,14 +3,11 @@
 """The methods to compute labels for machine learning the heat capacity."""
 
 from ase.io import read
-from .phononfunctions import  cv_from_pdos_site 
+from .utils import  cv_from_pdos_site 
 import pandas as pd
 import numpy as np
 import phonopy
 from phonopy.units import CP2KToTHz
-import glob
-import yaml
-
 
 def compute_total_dos_structure(phonopy_params: str, unitfactor=CP2KToTHz, dx:float=0.5, fmax:float=100.0, freq_pitch:float=0.5, saveto: str=None):
     """Compute projected dos from phonopy parameter file

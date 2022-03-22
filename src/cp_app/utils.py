@@ -2,18 +2,79 @@
 
 """The utilities for ``cp_app``."""
 
+import numpy as np
+import yaml
 
-def iter_together(path_left: str, path_right: str):
-    """Open the two files, iterate over them, and zip them together.
+Kb=1.3806504e-23  # Boltzmann constant in [J/K]
+Ph=1.98644586e-23 # Planck constant in [J.cm]
+Avo=6.02214076e23 # 1/mol
+J2cal=0.2390
+th2cm=33.35641
 
-    :param path_left: A path to a CSV file
-    :param path_right: A path to a CSV file
-    """
-    with open(path_left) as left_file, open(path_right) as right_file:
-        for left_line, right_line in zip(left_file, right_file):
-            left_idx, left_value = left_line.strip().split(',')
-            right_idx, right_value = right_line.strip().split(',')
-            yield left_idx, left_value, right_value
+def read_vibspectrum(filename):
+    frequencies=[]
+    with open(filename) as fi:
+        for line in fi.readlines()[3:-1]:
+            frequencies.append(float(line.strip().split()[2]))
+    return np.array(frequencies)
+
+def read_frequencies_from_mesh(filename):
+    mesh=yaml.load(open(filename))
+    w=[fr["frequency"] for fr in mesh["phonon"][0]["band"]]
+    w=np.array(w)*th2cm
+    return w
+
+def cv_from_pdos(temp, pdos):
+    pdos=pdos[np.where(pdos[:,0]>0)]
+    x = Ph * pdos[:,0] / Kb / temp
+    expVal = np.exp(x)
+    cv_contributions= np.sum(pdos[:,1:],axis=1)* Avo*Kb * x ** 2 * expVal / (expVal - 1.0) ** 2
+    return np.sum(cv_contributions)
+
+def cv_from_dos(temp, totaldos):
+    dos=totaldos[np.where(totaldos[:,0]>0)]
+    x = Ph * dos[:,0] / Kb / temp
+    expVal = np.exp(x)
+    cv_contributions= dos[:,1]* Avo*Kb * x ** 2 * expVal / (expVal - 1.0) ** 2
+    return np.sum(cv_contributions)
+
+def cv_from_frequencies(temp, freqs):
+    freqs=freqs[freqs>0]
+    x = Ph * freqs / Kb / temp
+    expVal = np.exp(x)
+    cv_contributions=Avo*Kb * x ** 2 * expVal / (expVal - 1.0) ** 2
+    return np.sum(cv_contributions)
+
+def read_totaldos(filename):
+    data=np.loadtxt(filename,skiprows=1)
+    data[:,0]*=th2cm
+    return data
+
+def read_pdos(filename):
+    data=np.loadtxt(filename,skiprows=1)
+    data[:,0]*=th2cm
+    return data
+
+
+def add_type_label(mydict,atomtype,name,label):
+    if atomtype in mydict:
+        mydict[atomtype][name]=label
+    else:
+        mydict[atomtype]={name:label}
+    return mydict
+
+def read_atoms_from_mesh(filename):
+    mesh=yaml.load(open(filename))
+    w=[fr["frequency"] for fr in mesh["phonon"][0]["band"]]
+    w=np.array(w)*th2cm
+    return w
+
+def cv_from_pdos_site(temp, pdos,site):
+    pdos=pdos[np.where(pdos[:,0]>0)]
+    x = Ph * pdos[:,0] / Kb / temp
+    expVal = np.exp(x)
+    cv_contributions= pdos[:,site+1]* Avo*Kb * x ** 2 * expVal / (expVal - 1.0) ** 2
+    return np.sum(cv_contributions)
 
 
 
