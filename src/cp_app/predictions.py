@@ -37,7 +37,7 @@ def predict_Cv_ensemble_structure(ensemble_models: list, FEATURES: list, df_feat
     mol_mean = np.mean(predictions_molar)
     mol_std = np.std(predictions_molar)
     
-    for ix in df_features.loc[df_features["structure_name"]==name].index:
+    for ix in df_features.loc[df_features["structure_name"]==structure_name].index:
         df_features.loc[ix,"Cv_gravimetric_predicted_mean"]= gr_mean
         df_features.loc[ix,"Cv_gravimetric_predicted_std"]= gr_std
         df_features.loc[ix,"Cv_molar_predicted_mean"] = mol_mean
@@ -80,7 +80,7 @@ def predict_Cv_ensemble_dataset(models: list, FEATURES: list, df_features: pd.Da
     return results
 
 
-def predict_Cv_ensemble_dataset(path_to_models: str, features_file: str="features.csv", FEATURES: list=cv_features, temperatures: list=[300.00], save_to: str="cv_predicted.csv") -> pd.DataFrame:
+def predict_Cv_ensemble_dataset_multitemperatures(path_to_models: str, features_file: str="features.csv", FEATURES: list=cv_features, temperatures: list=[300.00], save_to: str="cv_predicted.csv") -> pd.DataFrame:
     """Predict heat capacity for multiple temperatures using an ensemble of ML models for a dataset.
 
     :param path_to_models: directory storing the ML models
@@ -96,7 +96,7 @@ def predict_Cv_ensemble_dataset(path_to_models: str, features_file: str="feature
     for i,temperature in enumerate(temperatures):
         models=[]
         print("loading models for:", temperature)
-        modelnames = glob.glob("{}/{}/*".format(path_to_models, temperature))
+        modelnames = glob.glob("{}/{:.2f}/*".format(path_to_models, temperature))
         models = [joblib.load(n) for n in modelnames]
         print("{} models loaded, predicting...".format(len(models)))
         if i==0:
