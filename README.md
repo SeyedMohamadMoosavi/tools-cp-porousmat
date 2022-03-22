@@ -10,6 +10,11 @@ For installation follow this instructions:
     $ cd cp_app
     $ python install -e .
 
+## Dependencies
+We rely on:
+- xgboost and sklearn for machine learning
+- phonopy for phonon calculations and processing
+- ase, pymatgen, and matminer for featurisation
 
 ## Documentation
 
