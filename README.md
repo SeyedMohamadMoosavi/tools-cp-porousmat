@@ -8,7 +8,7 @@ For installation follow this instructions:
    
     $ git clone https://github.com/seyedmohamadmoosavi/cp_app.git
     $ cd cp_app
-    $ python install -e .
+    $ pip install -e .
 
 ## Dependencies
 We rely on:
