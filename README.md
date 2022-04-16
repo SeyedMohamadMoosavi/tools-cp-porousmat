@@ -1,7 +1,5 @@
-# cpapp
+# tools-cp-porousmat
 Heat capacity predictor for porous materials
-
-
 
 ## Installation
 For installation follow this instructions:
@@ -16,6 +14,7 @@ We rely on:
 - phonopy for phonon calculations and processing
 - ase, pymatgen, and matminer for featurisation
 
+<!---
 ## Documentation
 
 
@@ -24,9 +23,17 @@ We rely on:
     $ pip install tox
     $ tox
 
+-->
 ## Usage
+
+See the jupyter notebooks in the ```examples``` folder. 
 
 ## Acknowledgement
 
+- The ACT PrISMa Project and ACT programme Accelerating CCS Technologies
+- Swiss National Science Foundation (SNSF)
+- European Commission
 
 ## Citation
+
+
