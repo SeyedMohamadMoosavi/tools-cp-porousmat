@@ -2,5 +2,3 @@
 ======================
 
 .. currentmodule:: cp_app
-
-.. autofunction:: iter_together
