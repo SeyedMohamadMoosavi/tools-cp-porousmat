@@ -5,7 +5,7 @@ Heat capacity predictor for porous materials
 For installation follow this instructions:
    
     $ git clone https://github.com/seyedmohamadmoosavi/cp_app.git
-    $ cd cp_app
+    $ cd tools-cp-porousmat
     $ pip install -e .
 
 ## Dependencies
