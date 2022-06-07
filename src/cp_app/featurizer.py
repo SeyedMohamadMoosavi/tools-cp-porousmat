@@ -26,6 +26,7 @@ def featurize_dataset(cifs: list, verbos=False, saveto: str="features.csv")-> pd
     for cif in cifs:
         structure = CifParser(cif).get_structures()[0]
         structure_name = Path(cif).name
+        features[structure_name]={}
         features[structure_name]["structure"]=structure
         features[structure_name]["structure_name"]=Path(cif).name
         features[structure_name]["structure_path"]=str(Path(cif).parent)
@@ -39,6 +40,8 @@ def featurize_dataset(cifs: list, verbos=False, saveto: str="features.csv")-> pd
         for atomidx in range(structure.num_sites):
             site_name="%s_%i"%(index,atomidx)
             features_dict[site_name]={}
+            features_dict[site_name]={"structure_name": row["structure_name"]}
+            features_dict[site_name].update({"structure_path": row["structure_path"]})
 
     ## 2. Site Elemental Property
     print("site elemental properties")

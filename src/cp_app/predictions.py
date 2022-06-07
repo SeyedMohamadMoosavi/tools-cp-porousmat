@@ -2,8 +2,6 @@
 
 """The methods to load ML models and predict the heat capacity using a set of ML features."""
 
-from ast import Raise
-from msilib.schema import Error
 import numpy as np
 import sys
 import pandas as pd
@@ -25,7 +23,7 @@ def predict_Cv_ensemble_structure(models: list, FEATURES: list, df_features: pd.
     Returns a list containing the gravimetric and molar heat capacity together with the uncertainty of the models
     """
     if len(df_features["structure_name"].unique())>2:
-        raise ValueError("More than one structure in the features file...")
+        raise Error("More than one structure in the features file...")
         
     df_site_structure = copy.deepcopy(df_features)
     structure_name = df_site_structure["structure_name"].unique()[0]
