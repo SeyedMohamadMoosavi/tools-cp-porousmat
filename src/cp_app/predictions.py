@@ -3,7 +3,6 @@
 """The methods to load ML models and predict the heat capacity using a set of ML features."""
 
 import numpy as np
-import sys
 import pandas as pd
 from .descriptors import cv_features
 import joblib
@@ -15,7 +14,7 @@ FEATURES = cv_features
 def predict_Cv_ensemble_structure(models: list, FEATURES: list, df_features: pd.DataFrame, temperature: float) -> list:
     """Predict heat capacity using an ensemble of ML models for one structure.
 
-    :param models: ensemble of ML models
+    :param models: list (ensemble) of ML models
     :param FEATURES: features for ML model
     :param df_features: pandas dataframe containing the features
     :param temperature: target temperature 
@@ -23,10 +22,11 @@ def predict_Cv_ensemble_structure(models: list, FEATURES: list, df_features: pd.
     Returns a list containing the gravimetric and molar heat capacity together with the uncertainty of the models
     """
     if len(df_features["structure_name"].unique())>2:
-        raise Error("More than one structure in the features file...")
+        raise ValueError("More than one structure in the features file...")
         
     df_site_structure = copy.deepcopy(df_features)
     structure_name = df_site_structure["structure_name"].unique()[0]
+    print(structure_name)
     for model_idx,model in enumerate(models):
         df_site_structure["pCv_{}_predicted_{}".format(temperature, model_idx)]=model.predict(df_site_structure[FEATURES])
     results=[]
@@ -44,33 +44,6 @@ def predict_Cv_ensemble_structure(models: list, FEATURES: list, df_features: pd.
         "Cv_molar_{}_std".format(temperature): np.std(predicted_mol),
     })
     return results
-
-
-
-
-    predictions_gravimetric = []
-    predictions_molar = []
-    for model_idx, model in enumerate(ensemble_models):
-        df_site_structure["pCv_300.00_predicted_%i"%model_idx]=model.predict(df_site_structure[FEATURES])
-        predicted_mol = np.sum(df_site_structure["pCv_300.00_predicted_%i"%model_idx])/len(df_site_structure)
-        predicted_gr = np.sum(df_site_structure["pCv_300.00_predicted_%i"%model_idx])/np.sum(df_site_structure["site AtomicWeight"])
-        predictions_molar.append(predicted_mol)
-        predictions_gravimetric.append(predicted_gr)
-    
-    gr_mean = np.mean(predictions_gravimetric)
-    gr_std = np.std(predictions_gravimetric)
-    mol_mean = np.mean(predictions_molar)
-    mol_std = np.std(predictions_molar)
-    
-    for ix in df_features.loc[df_features["structure_name"]==structure_name].index:
-        df_features.loc[ix,"Cv_gravimetric_predicted_mean"]= gr_mean
-        df_features.loc[ix,"Cv_gravimetric_predicted_std"]= gr_std
-        df_features.loc[ix,"Cv_molar_predicted_mean"] = mol_mean
-        df_features.loc[ix,"Cv_molar_predicted_std"] = mol_std
-        
-        
-    return gr_mean, gr_std, mol_mean, mol_std
-
 
 def predict_Cv_ensemble_dataset(models: list, FEATURES: list, df_features: pd.DataFrame, temperature: float) -> list:
     """Predict heat capacity using an ensemble of ML models for a dataset.
