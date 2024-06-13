@@ -36,8 +36,6 @@ See the jupyter notebooks in the ```examples``` folder.
 
 ## Citation
 
-Please cite our work 
-"""
-Moosavi, S.M., Novotny, B.Á., Ongari, D. et al. A data-science approach to predict the heat capacity of nanoporous materials. Nat. Mater. 21, 1419–1425 (2022). https://doi.org/10.1038/s41563-022-01374-3
-"""
-https://doi.org/10.1038/s41563-022-01374-3
+Please consider citing our work:
+- Moosavi, S.M., Novotny, B.Á., Ongari, D. et al. A data-science approach to predict the heat capacity of nanoporous materials. Nat. Mater. 21, 1419–1425 (2022). https://doi.org/10.1038/s41563-022-01374-3
+
